@@ -1,0 +1,37 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          track_progress: true
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            Perform a code review focusing on:
+
+            1. **Code Quality** — clean code, error handling, readability
+            2. **Security** — vulnerabilities, input sanitization, auth logic
+            3. **Performance** — bottlenecks, query efficiency, memory leaks
+            4. **Testing** — test coverage, edge cases, missing scenarios
+            5. **Documentation** — comments, README updates, API docs
+
+            Use inline comments for specific issues and top-level comments for general observations.
